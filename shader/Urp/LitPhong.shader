@@ -1,4 +1,4 @@
-Shader "LitPhong"
+Shader "KPinURP/LitPhong"
 {
     Properties
     {

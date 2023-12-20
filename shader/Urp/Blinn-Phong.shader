@@ -1,4 +1,4 @@
-Shader "Blinn-Phong"
+Shader "KPinURP/Blinn-Phong"
 {
     Properties
     {

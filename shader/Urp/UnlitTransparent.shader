@@ -1,4 +1,4 @@
-Shader "UnlitTransparent"
+Shader "KPinURP/UnlitTransparent"
 {
     Properties
     {

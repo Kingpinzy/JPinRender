@@ -1,4 +1,4 @@
-Shader "Unlit URP Shader"
+Shader "KPinURP/Base"
 {
     Properties
     {

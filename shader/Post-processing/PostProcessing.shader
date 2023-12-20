@@ -29,7 +29,7 @@ Shader "Post-processing/PostProcessing"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-            #include "Assets/KingPinCore/Effect.hlsl"
+            #include "Assets/JPinRender/KingPinCore/Effect.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
             half4 _BaseColor;

@@ -1,4 +1,4 @@
-Shader "UrpLit"
+Shader "KPinURP/UrpLit"
 {
     Properties
     {

@@ -1,4 +1,4 @@
-Shader "URP/PBR"
+Shader "KPinURP/PBR"
 {
     Properties
     {
@@ -31,7 +31,7 @@ Shader "URP/PBR"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-        #include "Assets/KingPinCore/PbrData.hlsl"
+        #include "Assets/JPinRender/KingPinCore/PbrData.hlsl"
         
 
         #pragma shader_feature _ADDITIONALLIGHTS
