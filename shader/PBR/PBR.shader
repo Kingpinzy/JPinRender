@@ -36,37 +36,42 @@ Shader "KPinURP/PBR"
 
         #pragma shader_feature _ADDITIONALLIGHTS
         // 接收阴影所需关键字
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS                    //接受阴影
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE            //产生阴影
-        #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS                         //额外光源阴影
-        #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS      //开启额外其它光源计算
-        #pragma multi_compile _ _SHADOWS_SOFT                         //软阴影
+        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS//接受阴影
+        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE//产生阴影
+        #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS//额外光源阴影
+        #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS//开启额外其它光源计算
+        #pragma multi_compile _ _SHADOWS_SOFT//软阴影
 
         //C缓存区
         CBUFFER_START(UnityPerMaterial)
         float4 _DiffuseTex_ST;
-        float4 _BaseColor,_EmissivColor;
-        float _NormalScale,_Metallic,_Roughness,_EmissivInt,_LightInt;
+        float4 _BaseColor;
+        float4 _EmissivColor;
+        float _NormalScale;
+        float _Metallic;
+        float _Roughness;
+        float _EmissivInt;
+        float _LightInt;
         float _NormalInvertG,_RoughnessInvert,_AO;
         CBUFFER_END
 
         struct Attributes
         {
-            float4 positionOS : POSITION;                     //输入顶点
-            float4 normalOS : NORMAL;                         //输入法线
-            float2 texcoord : TEXCOORD0;                      //输入uv信息
-            float4 tangentOS : TANGENT;                       //输入切线
+            float4 positionOS : POSITION;//输入顶点
+            float4 normalOS : NORMAL;//输入法线
+            float2 texcoord : TEXCOORD0;//输入uv信息
+            float4 tangentOS : TANGENT;//输入切线
         };
 
         struct Varyings
         {
-            float2 uv : TEXCOORD0;                            //输出uv
-            float4 positionCS : SV_POSITION;                  //齐次位置
-            float3 positionWS : TEXCOORD1;                    //世界空间下顶点位置信息
-            float3 normalWS : NORMAL;                         //世界空间下法线信息
-            float3 tangentWS : TANGENT;                       //世界空间下切线信息
-            float3 BtangentWS : TEXCOORD2;                    //世界空间下副切线信息
-            float3 viewDirWS : TEXCOORD3;                     //世界空间下观察视角
+            float2 uv : TEXCOORD0;//输出uv
+            float4 positionCS : SV_POSITION;//齐次位置
+            float3 positionWS : TEXCOORD1;//世界空间下顶点位置信息
+            float3 normalWS : NORMAL;//世界空间下法线信息
+            float3 tangentWS : TANGENT;//世界空间下切线信息
+            float3 BtangentWS : TEXCOORD2;//世界空间下副切线信息
+            float3 viewDirWS : TEXCOORD3;//世界空间下观察视角
         };
 
         TEXTURE2D(_DiffuseTex);
@@ -99,15 +104,16 @@ Shader "KPinURP/PBR"
                 Varyings output;
                 output.uv = TRANSFORM_TEX(input.texcoord, _DiffuseTex);
                 VertexPositionInputs  PositionInputs = GetVertexPositionInputs(input.positionOS.xyz);
-                output.positionCS = PositionInputs.positionCS;                          //获取齐次空间位置
-                output.positionWS = PositionInputs.positionWS;                          //获取世界空间位置信息
+                output.positionCS = PositionInputs.positionCS;//获取齐次空间位置
+                output.positionWS = PositionInputs.positionWS;//获取世界空间位置信息
 
                 VertexNormalInputs NormalInputs = GetVertexNormalInputs(input.normalOS.xyz,input.tangentOS);
-                output.normalWS.xyz = NormalInputs.normalWS;                                //  获取世界空间下法线信息
-                output.tangentWS.xyz = NormalInputs.tangentWS;                              //  获取世界空间下切线信息
-                output.BtangentWS.xyz = NormalInputs.bitangentWS;                            //  获取世界空间下副切线信息
+                output.normalWS.xyz = NormalInputs.normalWS;//  获取世界空间下法线信息
+                output.tangentWS.xyz = NormalInputs.tangentWS;//  获取世界空间下切线信息
+                output.BtangentWS.xyz = NormalInputs.bitangentWS;//  获取世界空间下副切线信息
 
-                output.viewDirWS = GetCameraPositionWS() - PositionInputs.positionWS;   //  相机世界位置 - 世界空间顶点位置
+                // output.viewDirWS = GetCameraPositionWS() - PositionInputs.positionWS;//  相机世界位置 - 世界空间顶点位置
+                output.viewDirWS = _WorldSpaceCameraPos - PositionInputs.positionWS;// 相机世界位置 - 世界空间顶点位置
                 return output;
             }
 
@@ -117,9 +123,9 @@ Shader "KPinURP/PBR"
                 // ============================================================================================================================================================
                 half4 albedo = SAMPLE_TEXTURE2D(_DiffuseTex,sampler_DiffuseTex,input.uv);
                 half4 normal = SAMPLE_TEXTURE2D(_NormalTex,sampler_NormalTex,input.uv);
-                normal.g = lerp(normal.g,1-normal.g,_NormalInvertG);                                // 切换不同平台法线
+                normal.g = lerp(normal.g,1-normal.g,_NormalInvertG);// 切换不同平台法线
                 half4 mask = SAMPLE_TEXTURE2D(_MaskTex,sampler_MaskTex,input.uv);
-                mask.g = lerp(mask.g, 1 - mask.g , _RoughnessInvert);                               // 粗糙度翻转
+                mask.g = lerp(mask.g, 1 - mask.g , _RoughnessInvert);// 粗糙度翻转
 
                 half metallic = _Metallic * mask.r;
                 half smoothness = _Roughness * mask.g;
@@ -127,12 +133,12 @@ Shader "KPinURP/PBR"
                 half3 emissive = mask.a * _EmissivColor.rgb * _EmissivInt;
                 half roughness = pow((1 - _Roughness),2);
                 // ============================================================================================================================================================
-                float3x3 TBN = {input.tangentWS.xyz, input.BtangentWS.xyz, input.normalWS.xyz};            // 矩阵
+                float3x3 TBN = {input.tangentWS.xyz, input.BtangentWS.xyz, input.normalWS.xyz}; // 矩阵
                 TBN = transpose(TBN);
-                float3 norTS = UnpackNormalScale(normal, _NormalScale);                        // 使用变量控制法线的强度
-                norTS.z = sqrt(1 - saturate(dot(norTS.xy, norTS.xy)));                        // 规范化法线
+                float3 norTS = UnpackNormalScale(normal, _NormalScale);// 使用变量控制法线的强度
+                norTS.z = sqrt(1 - saturate(dot(norTS.xy, norTS.xy))); // 规范化法线
 
-                half3 N = NormalizeNormalPerPixel(mul(TBN, norTS));                           // 顶点法线和法线贴图融合 = 输出世界空间法线信息
+                half3 N = NormalizeNormalPerPixel(mul(TBN, norTS));// 顶点法线和法线贴图融合 = 输出世界空间法线信息
                 // ============================================================================================================================================================
 
                 half3 PBRcolor = PBR(input.viewDirWS,N,input.positionWS,albedo.rgb,roughness,metallic,ao,smoothness,emissive);
@@ -167,11 +173,11 @@ Shader "KPinURP/PBR"
 		    Varyings vertshadow(Attributes v)
 		    {
 		        Varyings output;
-                float3 posWS = TransformObjectToWorld(v.positionOS.xyz);         //世界空间下顶点位置
-                float3 norWS = TransformObjectToWorldNormal(v.normalOS.xyz);           //世界空间下顶点位置
-                Light MainLight = GetMainLight();                                     //获取灯光
+                float3 posWS = TransformObjectToWorld(v.positionOS.xyz);//世界空间下顶点位置
+                float3 norWS = TransformObjectToWorldNormal(v.normalOS.xyz);//世界空间下顶点位置
+                Light MainLight = GetMainLight();//获取灯光
 
-                output.positionCS = TransformWorldToHClip(ApplyShadowBias(posWS,norWS,MainLight.direction));             //这里是公共结构体里调用就可以
+                output.positionCS = TransformWorldToHClip(ApplyShadowBias(posWS,norWS,MainLight.direction));//这里是公共结构体里调用就可以
                 #if UNITY_REVERSED_Z
                 output.positionCS.z - min(output.positionCS.z,output.positionCS.w * UNITY_NEAR_CLIP_VALUE);
                 #else

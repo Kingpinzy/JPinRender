@@ -12,7 +12,7 @@
 
 float Distribution(float roughness, float nh)
 {
-	float lerpSquareRoughness = pow(lerp(0.01,1, roughness),2);                  // 这里限制最小高光点
+	float lerpSquareRoughness = pow(lerp(0.01,1, roughness),2);// 这里限制最小高光点
 	float D = lerpSquareRoughness / (pow((pow(nh,2) * (lerpSquareRoughness - 1) + 1), 2) * PI);
 	return D;
 }
@@ -25,14 +25,14 @@ inline real G_subSection(half dot, half k)
 // 这里计算G的方法
 float Geometry(float roughness, float nl, float nv)
 {
-    //half k = pow(roughness + 1,2)/8.0;          // 直接光的K值
+    //half k = pow(roughness + 1,2)/8.0;// 直接光的K值
 
-    //half k = pow(roughness,2)/2;                // 间接光的K值
+    //half k = pow(roughness,2)/2;// 间接光的K值
 
     half k = pow(1 + roughness, 2) * 0.5;
 
-    float GLeft = G_subSection(nl,k);           // 第一部分的 G
-    float GRight = G_subSection(nv,k);          // 第二部分的 G
+    float GLeft = G_subSection(nl,k);// 第一部分的 G
+    float GRight = G_subSection(nv,k);// 第二部分的 G
     float G = GLeft * GRight;
     return G;
 }
@@ -67,9 +67,9 @@ float3 IndirF_Function(float NdotV, float3 F0, float roughness)
 //间接光高光 反射探针
 real3 IndirectSpeCube(float3 normalWS, float3 viewWS, float roughness, float AO)
 {
-    float3 reflectDirWS = reflect(-viewWS, normalWS);                                                  // 计算出反射向量
-    roughness = roughness * (1.7 - 0.7 * roughness);                                                   // Unity内部不是线性 调整下拟合曲线求近似
-    float MidLevel = roughness * 6;                                                                    // 把粗糙度remap到0-6 7个阶级 然后进行lod采样
+    float3 reflectDirWS = reflect(-viewWS, normalWS);// 计算出反射向量
+    roughness = roughness * (1.7 - 0.7 * roughness);// Unity内部不是线性 调整下拟合曲线求近似
+    float MidLevel = roughness * 6;// 把粗糙度remap到0-6 7个阶级 然后进行lod采样
     float4 speColor = SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectDirWS, MidLevel);//根据不同的等级进行采样
 #if !defined(UNITY_USE_NATIVE_HDR)
     return DecodeHDREnvironment(speColor, unity_SpecCube0_HDR) * AO;//用DecodeHDREnvironment将颜色从HDR编码下解码。可以看到采样出的rgbm是一个4通道的值，最后一个m存的是一个参数，解码时将前三个通道表示的颜色乘上xM^y，x和y都是由环境贴图定义的系数，存储在unity_SpecCube0_HDR这个结构中。
@@ -102,15 +102,15 @@ half3 PBR(float3 view,float3 normal,float3 position, float3 albedo, float rough,
 {
 
     // 函数内
-    half4 shadowCoord = TransformWorldToShadowCoord(position);                  // 计算阴影
-    Light mainLight = GetMainLight(shadowCoord);                                             // 获取光照
-    half atten = mainLight.shadowAttenuation * mainLight.distanceAttenuation;        // 计算距离衰减和阴影衰减
-    half4 lightColor = float4(mainLight.color,1);                                 // 获取光照颜色
+    half4 shadowCoord = TransformWorldToShadowCoord(position);// 计算阴影
+    Light mainLight = GetMainLight(shadowCoord);// 获取光照
+    half atten = mainLight.shadowAttenuation * mainLight.distanceAttenuation;// 计算距离衰减和阴影衰减
+    half4 lightColor = float4(mainLight.color,1);// 获取光照颜色
 
 
     float3 viewDir   = normalize(view);
     float3 normalDir = normalize(normal);
-    float3 lightDir  = normalize(mainLight.direction);                            // 获取光照颜色
+    float3 lightDir  = normalize(mainLight.direction);// 获取光照颜色
     float3 halfDir   = normalize(viewDir + lightDir);
 
     float nh = max(saturate(dot(normalDir, halfDir)), 0.001);
@@ -126,19 +126,19 @@ half3 PBR(float3 view,float3 normal,float3 position, float3 albedo, float rough,
     half3 F = FresnelEquation(F0,hl);
 
     half3 ks = F;
-    half3 kd = (1- ks) * (1 - metal);                   // 计算kd
+    half3 kd = (1- ks) * (1 - metal);// 计算kd
 
 
     half3 SpecularResult = (D * G * F) / (nv * nl * 4);
 
     half3 DirectSpeColor = saturate(SpecularResult * lightColor.rgb * (nl * PI * ao));
-    half3 DirectDiffColor = kd * albedo.rgb * lightColor.rgb * nl * atten;                   // 增加阴影 衰减
+    half3 DirectDiffColor = kd * albedo.rgb * lightColor.rgb * nl * atten;// 增加阴影 衰减
     DirectDiffColor += emissive;
     half3 directLightResult = DirectDiffColor + DirectSpeColor;
 
     //间接光部分
-    half3 shcolor = SH_IndirectionDiff(normalDir) * ao;                                       // 这里可以AO
-    half3 indirect_ks = IndirF_Function(nv,F0,rough);                                         // 计算 ks
+    half3 shcolor = SH_IndirectionDiff(normalDir) * ao;// 这里可以AO
+    half3 indirect_ks = IndirF_Function(nv,F0,rough);// 计算 ks
     half3 indirect_kd = (1 - indirect_ks) * (1 - metal);
     half3 indirectDiffColor = shcolor * indirect_kd * albedo;
 
@@ -154,10 +154,10 @@ half3 PBR(float3 view,float3 normal,float3 position, float3 albedo, float rough,
 
 half3 PBRDirectLightResult(Light light, float3 view,float3 normal, float3 albedo, float rough, float metal)
 {
-    half4 lightColor = float4(light.color,1);                                 // 获取光照颜色
+    half4 lightColor = float4(light.color,1);// 获取光照颜色
     float3 viewDir   = normalize(view);
     float3 normalDir = normalize(normal);
-    float3 lightDir  = normalize(light.direction);                            // 获取光照颜色
+    float3 lightDir  = normalize(light.direction);// 获取光照颜色
     float3 halfDir   = normalize(viewDir + lightDir);
 
     float nh = max(saturate(dot(normalDir, halfDir)), 0.001);
@@ -173,7 +173,7 @@ half3 PBRDirectLightResult(Light light, float3 view,float3 normal, float3 albedo
     half3 F = FresnelEquation(F0,hl);
 
     half3 ks = F;
-    half3 kd = (1- ks) * (1 - metal);                   // 计算kd
+    half3 kd = (1- ks) * (1 - metal);// 计算kd
 
 
     half3 SpecularResult = (D * G * F) / (nv * nl * 4);
